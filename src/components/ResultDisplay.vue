@@ -12,7 +12,7 @@ const isCopied = ref(false);
 const copyToClipboard = async () => {
   if (!props.result) return;
 
-  // 絵文字を削除してシンプルなタイトルに
+
   let text = '部屋割り結果\n\n';
 
   for (const [roomId, members] of Object.entries(props.result.roomAssignments)) {
