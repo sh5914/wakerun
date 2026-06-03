@@ -24,7 +24,8 @@ const handleAdd = () => {
     name: inputName.value,
     // 学年を使用しないモードの時はダミー値を入れる
     grade: props.gradeMode === 'none' ? 'none' : selectedGrade.value,
-    gender: selectedGender.value
+    gender: selectedGender.value,
+    attributes: []
   });
 
   // 名前だけ空にして、学年と性別は連続で追加しやすいようにそのまま残す
@@ -58,8 +59,8 @@ const formatGrade = (grade: string | number) => {
           <option value="2">2年</option>
           <option value="3">3年</option>
           <option value="4">4年</option>
-          <option value="4">5年</option>
-          <option value="4">6年</option>
+          <option value="5">5年</option>
+          <option value="6">6年</option>
         </template>
         <template v-if="gradeMode === 'univ'">
           <option value="B1">学部1年 (B1)</option>
