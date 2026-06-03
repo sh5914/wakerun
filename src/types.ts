@@ -6,9 +6,6 @@ export interface Member {
   name: string;
   gender: 'male' | 'female';
   grade: string | number;
-  attributes: {
-    snoring: boolean;
-  };
 }
 
 export interface Room {

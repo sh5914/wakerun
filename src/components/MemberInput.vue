@@ -24,8 +24,7 @@ const handleAdd = () => {
     name: inputName.value,
     // 学年を使用しないモードの時はダミー値を入れる
     grade: props.gradeMode === 'none' ? 'none' : selectedGrade.value,
-    gender: selectedGender.value,
-    attributes: []
+    gender: selectedGender.value
   });
 
   // 名前だけ空にして、学年と性別は連続で追加しやすいようにそのまま残す
