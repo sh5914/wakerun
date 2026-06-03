@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Constraint, Member, PriorityRank } from '../types';
+import type { Constraint, Member, PriorityRank, GradeMode } from '../types'; // 🌟 GradeModeを追加
 
 const props = defineProps<{
   constraints: Constraint[];
   members: Member[];
+  gradeMode: GradeMode; 
 }>();
 
 const emit = defineEmits<{
@@ -61,8 +62,8 @@ const getConstraintLabel = (c: Constraint) => {
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <select v-model="selectedType" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px;">
           <option value="gender_separate">男女を分ける</option>
-          <option value="grade_grouped">学年が固まるようにする</option>
-          <option value="grade_even">学年が均等になるようにする</option>
+          <option v-if="gradeMode !== 'none'" value="grade_grouped">学年が固まるようにする</option>
+          <option v-if="gradeMode !== 'none'" value="grade_even">学年が均等になるようにする</option>
           <option value="pair">特定の2人を一緒にする</option>
         </select>
 

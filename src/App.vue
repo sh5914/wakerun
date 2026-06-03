@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'; // ★ データの変更を監視するために 'watch' を追加
-import type { Member, Room, Constraint, AssignResult } from './types';
+import type { Member, Room, Constraint, AssignResult, GradeMode } from './types';
 import { solveAssignments } from './logic/solver';
 
 import MemberInput from './components/MemberInput.vue';
@@ -19,6 +19,10 @@ const rooms = ref<Room[]>(
 const constraints = ref<Constraint[]>(
   JSON.parse(localStorage.getItem('wakerun_constraints') || '[]')
 );
+const gradeMode = ref<GradeMode>(
+  (localStorage.getItem('wakerun_gradeMode') as GradeMode) || 'normal'
+);
+
 
 const result = ref<AssignResult | null>(null);
 const errorMessage = ref<string>('');
@@ -36,6 +40,10 @@ watch(rooms, (newVal) => {
 watch(constraints, (newVal) => {
   localStorage.setItem('wakerun_constraints', JSON.stringify(newVal));
 }, { deep: true });
+
+watch(gradeMode, (newVal) => {
+  localStorage.setItem('wakerun_gradeMode', newVal);
+});
 
 
 // --- 追加・削除の処理（ここは変更なし） ---
@@ -62,11 +70,23 @@ const runSolver = () => {
 
 <template>
   <div style="max-width: 800px; margin: 0 auto; font-family: sans-serif; padding: 20px;">
-    <h1 style="text-align: center;">🧩 わけるん</h1>
+    <h1 style="text-align: center;">わけるん</h1>
     <p style="text-align: center;">自動部屋割り最適化ツール</p>
+
+
+    <div style="border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 20px; border-radius: 8px; background-color: #f8f9fa;">
+      <h3 style="margin-top: 0; font-size: 16px;">⚙️ 基本設定</h3>
+      <label style="font-weight: bold; margin-right: 10px;">学年の入力:</label>
+      <select v-model="gradeMode" style="padding: 8px; font-size: 14px; border-radius: 4px; border: 1px solid #aaa;">
+        <option value="none">使用しない（社会人・友人グループなど）</option>
+        <option value="normal">一般表記（1年、2年...）</option>
+        <option value="univ">大学・大学院表記（B1、M1...）</option>
+      </select>
+    </div>
 
     <MemberInput 
       :members="members" 
+      :grade-mode="gradeMode"
       @add="handleAddMember" 
       @remove="handleRemoveMember" 
     />
@@ -80,6 +100,7 @@ const runSolver = () => {
     <ConstraintInput 
       :constraints="constraints" 
       :members="members"
+      :grade-mode="gradeMode"
       @add="handleAddConstraint" 
       @remove="handleRemoveConstraint" 
     />
@@ -100,6 +121,7 @@ const runSolver = () => {
     <ResultDisplay 
       :result="result" 
       :rooms="rooms" 
+      :grade-mode="gradeMode"
     />
   </div>
 </template>

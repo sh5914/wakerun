@@ -30,3 +30,5 @@ export interface AssignResult {
   totalPenalty: number;
   ignoredConstraints: Constraint[];
 }
+
+export type GradeMode = 'none' | 'normal' | 'univ';

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { AssignResult, Room } from '../types';
+import type { AssignResult, Room, GradeMode } from '../types'; // 🌟 GradeModeを追加
 
 const props = defineProps<{
   result: AssignResult | null;
   rooms: Room[];
+  gradeMode: GradeMode; 
 }>();
 
 const isCopied = ref(false);
@@ -22,7 +23,12 @@ const copyToClipboard = async () => {
     
     for (const m of members) {
       const genderStr = m.gender === 'male' ? '男' : '女';
-      text += `・${m.name} (${m.grade}年/${genderStr})\n`;
+      if (props.gradeMode === 'none') {
+        text += `・${m.name} (${genderStr})\n`;
+      } else {
+        const gradeStr = isNaN(Number(m.grade)) ? String(m.grade) : `${m.grade}年`;
+        text += `・${m.name} (${gradeStr}/${genderStr})\n`;
+      }
     }
     text += '\n'; 
   }
@@ -90,8 +96,11 @@ const copyToClipboard = async () => {
         <ul style="padding-left: 20px; margin: 0;">
           <li v-for="m in members" :key="m.id" style="margin-bottom: 5px; font-size: 15px;">
             <strong>{{ m.name }}</strong>
-            <span style="color: #666; font-size: 12px; margin-left: 5px;">
-              ({{ m.grade }}年/{{ m.gender === 'male' ? '男' : '女' }})
+            <span v-if="gradeMode === 'none'" style="color: #666; font-size: 12px; margin-left: 5px;">
+              ({{ m.gender === 'male' ? '男' : '女' }})
+            </span>
+            <span v-else style="color: #666; font-size: 12px; margin-left: 5px;">
+              ({{ isNaN(Number(m.grade)) ? m.grade : m.grade + '年' }}/{{ m.gender === 'male' ? '男' : '女' }})
             </span>
           </li>
         </ul>
