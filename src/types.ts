@@ -5,7 +5,7 @@ export interface Member {
   id: string;
   name: string;
   gender: 'male' | 'female';
-  grade: number;
+  grade: string | number;
   attributes: {
     snoring: boolean;
   };
