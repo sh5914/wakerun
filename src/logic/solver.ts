@@ -33,9 +33,9 @@ export function calculatePenalty(
     let isViolated = false;
 
     if (constraint.type === 'pair' || constraint.type === 'separate') {
-      if (!constraint.targetMemberIds) continue;
-      const roomA = memberRoomMap.get(constraint.targetMemberIds[0]);
-      const roomB = memberRoomMap.get(constraint.targetMemberIds[1]);
+      if (!constraint.targetIds) continue;
+      const roomA = memberRoomMap.get(constraint.targetIds[0]);
+      const roomB = memberRoomMap.get(constraint.targetIds[1]);
       
       if (roomA && roomB) {
         if (constraint.type === 'pair' && roomA !== roomB) isViolated = true;
@@ -79,6 +79,36 @@ export function calculatePenalty(
 
         // 実際の人数と、重複を消した学年の数が違う ＝ 誰かの学年が被っている！
         if (uniqueGrades.size < membersInRoom.length) {
+          isViolated = true;
+          break;
+        }
+      }
+    }
+
+    else if (constraint.type === 'tag_grouped') {
+      // 特定のタグを持つ人を同じ部屋に集める（喫煙者など）
+      if (!constraint.targetTag) continue;
+      let roomsWithTag = 0;
+      for (const room of rooms) {
+        const membersInRoom = assignments[room.id] || [];
+        const hasTag = membersInRoom.some(m => m.tags?.includes(constraint.targetTag!));
+        if (hasTag) {
+          roomsWithTag++;
+        }
+      }
+      // タグを持つ人が2つ以上の部屋に散らばってしまったら違反
+      if (roomsWithTag > 1) {
+        isViolated = true;
+      }
+    }
+    else if (constraint.type === 'tag_separate') {
+      // 特定のタグを持つ人を別の部屋に分散させる（幹事など）
+      if (!constraint.targetTag) continue;
+      for (const room of rooms) {
+        const membersInRoom = assignments[room.id] || [];
+        const tagCount = membersInRoom.filter(m => m.tags?.includes(constraint.targetTag!)).length;
+        // 2人以上同じ部屋に固まってしまったら違反
+        if (tagCount > 1) {
           isViolated = true;
           break;
         }

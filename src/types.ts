@@ -1,11 +1,11 @@
-// src/types.ts
-export type PriorityRank = 'S' | 'A' | 'B';
+export type GradeMode = 'none' | 'normal' | 'univ';
 
 export interface Member {
   id: string;
   name: string;
-  gender: 'male' | 'female';
   grade: string | number;
+  gender: 'male' | 'female';
+  tags?: string[]; // ✨ 追加: 自由に設定できるタグ機能
 }
 
 export interface Room {
@@ -14,18 +14,21 @@ export interface Room {
   capacity: number;
 }
 
+// ✨ 追加: tag_grouped（同じタグを集める）, tag_separate（同じタグを散らす）
+export type ConstraintType = 'gender_separate' | 'grade_grouped' | 'grade_even' | 'pair' | 'separate' | 'tag_grouped' | 'tag_separate';
+
+export type PriorityRank = 'S' | 'A' | 'B';
+
 export interface Constraint {
   id: string;
-  // ★ ここに新しいルールを追加！
-  type: 'pair' | 'separate' | 'gender_separate' | 'grade_grouped' | 'grade_even';
-  targetMemberIds?: [string, string]; // ペア指定の時だけ使うので ? (任意) にする
+  type: ConstraintType;
   priority: PriorityRank;
+  targetIds?: string[];
+  targetTag?: string; // ✨ 追加: タグ条件を使う時の「対象のタグ名」
 }
 
 export interface AssignResult {
-  roomAssignments: { [roomId: string]: Member[] };
+  roomAssignments: Record<string, Member[]>;
   totalPenalty: number;
   ignoredConstraints: Constraint[];
 }
-
-export type GradeMode = 'none' | 'normal' | 'univ';
