@@ -8,7 +8,7 @@ const emit = defineEmits<{ (e: 'add', member: Member): void; (e: 'remove', id: s
 const inputName = ref('');
 const selectedGrade = ref<string | number>('3');
 const selectedGender = ref<'male' | 'female'>('male');
-const inputTags = ref(''); // ✨ タグ入力用
+const inputTags = ref('');
 
 const isBulkMode = ref(false);
 const bulkText = ref('');
@@ -24,9 +24,24 @@ const hasMixedGrades = computed(() => {
   return hasNumeric && hasString;
 });
 
+// ✨ すでに使われているタグのリストを自動抽出
+const existingTags = computed(() => {
+  const tags = new Set<string>();
+  props.members.forEach(m => m.tags?.forEach(t => tags.add(t)));
+  return Array.from(tags);
+});
+
+// ✨ タグ候補をクリックした時に、入力欄に追記する関数
+const appendTag = (tag: string) => {
+  const currentTags = inputTags.value.split(/[,\s]+/).filter(t => t);
+  // すでに入力欄に同じタグがなければ追加する
+  if (!currentTags.includes(tag)) {
+    inputTags.value = inputTags.value ? `${inputTags.value} ${tag}` : tag;
+  }
+};
+
 const handleAdd = () => {
   if (!inputName.value) return;
-  // ✨ カンマやスペースで区切られたタグを配列にする
   const tags = inputTags.value.split(/[,\s]+/).map(t => t.trim()).filter(t => t);
 
   emit('add', {
@@ -34,10 +49,10 @@ const handleAdd = () => {
     name: inputName.value,
     grade: props.gradeMode === 'none' ? 'none' : selectedGrade.value,
     gender: selectedGender.value,
-    tags: tags // ✨ タグ情報を追加
+    tags: tags
   });
   inputName.value = '';
-  inputTags.value = ''; // タグ欄をリセット
+  inputTags.value = '';
 };
 
 const handleBulkAdd = () => {
@@ -59,14 +74,14 @@ const handleBulkAdd = () => {
         const gStr = parts[1].toLowerCase();
         if (gStr.includes('女') || gStr === 'f' || gStr === 'female') gender = 'female';
       }
-      if (parts.length >= 3) tags = parts.slice(2); // ✨ 後ろの文字は全部タグとして扱う！
+      if (parts.length >= 3) tags = parts.slice(2);
     } else {
       if (parts.length >= 2) grade = parts[1];
       if (parts.length >= 3) {
         const gStr = parts[2].toLowerCase();
         if (gStr.includes('女') || gStr === 'f' || gStr === 'female') gender = 'female';
       }
-      if (parts.length >= 4) tags = parts.slice(3); // ✨ 後ろの文字は全部タグとして扱う！
+      if (parts.length >= 4) tags = parts.slice(3);
     }
 
     emit('add', {
@@ -93,21 +108,35 @@ const formatGrade = (grade: string | number) => isNaN(Number(grade)) ? String(gr
       </button>
     </div>
     
-    <div v-if="!isBulkMode" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
-      <input v-model="inputName" placeholder="名前 (例: SH)" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px; flex: 1; min-width: 120px;" @keyup.enter="handleAdd" />
-      <select v-if="gradeMode !== 'none'" v-model="selectedGrade" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px;">
-        <template v-if="gradeMode === 'normal'">
-          <option value="1">1年</option><option value="2">2年</option><option value="3">3年</option><option value="4">4年</option><option value="5">5年</option><option value="6">6年</option>
-        </template>
-        <template v-if="gradeMode === 'univ'">
-          <option value="B1">学部1年 (B1)</option><option value="B2">学部2年 (B2)</option><option value="B3">学部3年 (B3)</option><option value="B4">学部4年 (B4)</option><option value="M1">修士1年 (M1)</option><option value="M2">修士2年 (M2)</option><option value="OB">OB / OG</option>
-        </template>
-      </select>
-      <select v-model="selectedGender" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px;">
-        <option value="male">男性</option><option value="female">女性</option>
-      </select>
-      <input v-model="inputTags" placeholder="タグ (任意)" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px; flex: 1; min-width: 120px;" @keyup.enter="handleAdd" />
-      <button @click="handleAdd" style="padding: 8px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">＋</button>
+    <div v-if="!isBulkMode" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <input v-model="inputName" placeholder="名前 (例: SH)" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px; flex: 1; min-width: 120px;" @keyup.enter="handleAdd" />
+        <select v-if="gradeMode !== 'none'" v-model="selectedGrade" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px;">
+          <template v-if="gradeMode === 'normal'">
+            <option value="1">1年</option><option value="2">2年</option><option value="3">3年</option><option value="4">4年</option><option value="5">5年</option><option value="6">6年</option>
+          </template>
+          <template v-if="gradeMode === 'univ'">
+            <option value="B1">学部1年 (B1)</option><option value="B2">学部2年 (B2)</option><option value="B3">学部3年 (B3)</option><option value="B4">学部4年 (B4)</option><option value="M1">修士1年 (M1)</option><option value="M2">修士2年 (M2)</option><option value="OB">OB / OG</option>
+          </template>
+        </select>
+        <select v-model="selectedGender" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px;">
+          <option value="male">男性</option><option value="female">女性</option>
+        </select>
+        <input v-model="inputTags" placeholder="タグ (任意)" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px; flex: 1; min-width: 120px;" @keyup.enter="handleAdd" />
+        <button @click="handleAdd" style="padding: 8px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 16px;">＋</button>
+      </div>
+
+      <div v-if="existingTags.length > 0" style="padding-left: 5px;">
+        <span style="font-size: 13px; color: #666; margin-right: 8px;">よく使うタグ:</span>
+        <button 
+          v-for="tag in existingTags" 
+          :key="tag" 
+          @click="appendTag(tag)"
+          style="background-color: #e9ecef; color: #495057; border: 1px solid #ced4da; padding: 4px 10px; border-radius: 15px; font-size: 13px; margin-right: 6px; margin-bottom: 6px; cursor: pointer; transition: background-color 0.2s;"
+        >
+          ＋ {{ tag }}
+        </button>
+      </div>
     </div>
 
     <div v-else style="margin-bottom: 20px;">
