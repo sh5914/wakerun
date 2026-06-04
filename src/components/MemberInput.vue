@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue'; // ✨ computed を追加
 import type { Member, GradeMode } from '../types';
 
 const props = defineProps<{
@@ -16,9 +16,30 @@ const inputName = ref('');
 const selectedGrade = ref<string | number>('3');
 const selectedGender = ref<'male' | 'female'>('male');
 
-// 一括入力モード用の変数
 const isBulkMode = ref(false);
 const bulkText = ref('');
+
+// 🌟 学年表記の混在を検知する機能
+const hasMixedGrades = computed(() => {
+  if (props.gradeMode === 'none') return false;
+
+  let hasNumeric = false;
+  let hasString = false;
+
+  for (const m of props.members) {
+    if (m.grade === 'none') continue;
+    
+    // 数字に変換できるか（1, 2, 3...）できないか（M1, B4...）で判定
+    if (!isNaN(Number(m.grade))) {
+      hasNumeric = true;
+    } else {
+      hasString = true;
+    }
+  }
+
+  // 数字表記と文字表記の両方が存在したら true（警告を出す）
+  return hasNumeric && hasString;
+});
 
 const handleAdd = () => {
   if (!inputName.value) return;
@@ -33,7 +54,6 @@ const handleAdd = () => {
   inputName.value = '';
 };
 
-// スプレッドシートやLINEからのコピペを一括処理するエンジン
 const handleBulkAdd = () => {
   if (!bulkText.value.trim()) return;
 
@@ -41,7 +61,6 @@ const handleBulkAdd = () => {
   let addedCount = 0;
 
   for (const line of lines) {
-    // スペース、カンマ、タブなどでテキストを自動的に分割
     const parts = line.trim().split(/[,\t\s]+/);
     if (parts.length === 0 || !parts[0]) continue;
 
@@ -165,6 +184,11 @@ const formatGrade = (grade: string | number) => {
           🚀 まとめて登録する
         </button>
       </div>
+    </div>
+
+    <div v-if="hasMixedGrades" style="background-color: #fff3cd; color: #856404; padding: 12px; border: 1px solid #ffeeba; border-radius: 4px; margin-bottom: 15px; font-size: 14px;">
+      ⚠️ <strong>注意:</strong> 「3年」のような数字表記と、「M1」のような文字表記が混ざっています。<br>
+      このまま計算することは可能ですが、「学年を均等にする」などの条件が正しく機能しない可能性があります。表記を統一することをおすすめします。
     </div>
 
     <ul style="list-style-type: none; padding: 0; margin: 0;">
