@@ -66,22 +66,36 @@ export function calculatePenalty(
       }
     }
     else if (constraint.type === 'grade_even') {
-      // ★ ここが超賢くなりました！
-      // 同室に「同じ学年」が2人以上いたら違反（極力バラバラにする）
+      let gradePenaltySum = 0;
+
       for (const room of rooms) {
         const membersInRoom = assignments[room.id] || [];
         if (membersInRoom.length <= 1) continue;
-        
-        // 部屋にいるメンバーの学年だけを抽出 (例: [1, 1, 2])
-        const grades = membersInRoom.map(m => m.grade);
-        // Setを使って重複を消す (例: [1, 1, 2] -> [1, 2])
-        const uniqueGrades = new Set(grades);
 
-        // 実際の人数と、重複を消した学年の数が違う ＝ 誰かの学年が被っている！
-        if (uniqueGrades.size < membersInRoom.length) {
-          isViolated = true;
-          break;
+        // この部屋にいる「各学年の人数」を数える
+        const gradeCounts: Record<string, number> = {};
+        for (const m of membersInRoom) {
+          const g = String(m.grade);
+          gradeCounts[g] = (gradeCounts[g] || 0) + 1;
         }
+
+        // 被り具合（偏り）を計算してペナルティの「重み」を算出する
+        for (const count of Object.values(gradeCounts)) {
+          if (count > 1) {
+            // 被り人数から1を引いた数を2乗する
+            // （2人なら1点、3人固まると4点、4人固まると9点...と、密集するほど罰則を重くする）
+            gradePenaltySum += Math.pow(count - 1, 2);
+          }
+        }
+      }
+
+      if (gradePenaltySum > 0) {
+        // 標準の1回分のペナルティ（ループの下で自動加算される）に加えて、
+        // 被りのひどさに応じた「追加ペナルティ」をここで加算する
+        if (gradePenaltySum > 1) {
+          totalPenalty += (gradePenaltySum - 1) * PENALTY_WEIGHTS[constraint.priority];
+        }
+        isViolated = true;
       }
     }
 
