@@ -64,6 +64,7 @@ const getTypeLabel = (type: string, tag?: string) => {
       </select>
 
       <select v-model="selectedPriority" style="padding: 8px; font-size: 16px; border: 1px solid #aaa; border-radius: 4px;">
+        <option value="S">絶対 (S)</option>
         <option value="A">なるべく (A)</option>
         <option value="B">できれば (B)</option>
       </select>

@@ -126,7 +126,7 @@ const runSolver = () => {
         @click="runSolver"
         style="padding: 15px 30px; font-size: 18px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 8px; font-weight: bold;"
       >
-        🎲 部屋割りを計算する！
+        部屋割りを計算する！
       </button>
     </div>
 
@@ -134,6 +134,7 @@ const runSolver = () => {
       :result="result" 
       :rooms="rooms" 
       :grade-mode="gradeMode"
+      :members="members"
     />
   </div>
 </template>
