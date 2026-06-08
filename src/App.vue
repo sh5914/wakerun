@@ -56,6 +56,16 @@ const handleRemoveRoom = (id: string) => rooms.value = rooms.value.filter(r => r
 const handleAddConstraint = (c: Constraint) => constraints.value.push(c);
 const handleRemoveConstraint = (id: string) => constraints.value = constraints.value.filter(c => c.id !== id);
 
+const handleUpdateMember = (updatedMember: Member) => {
+  const index = members.value.findIndex(m => m.id === updatedMember.id);
+  if (index !== -1) members.value[index] = updatedMember;
+};
+
+const handleUpdateRoom = (updatedRoom: Room) => {
+  const index = rooms.value.findIndex(r => r.id === updatedRoom.id);
+  if (index !== -1) rooms.value[index] = updatedRoom;
+};
+
 // --- ガチャを回す処理（ここは変更なし） ---
 const runSolver = () => {
   errorMessage.value = ''; 
@@ -89,6 +99,7 @@ const runSolver = () => {
       :grade-mode="gradeMode"
       @add="handleAddMember" 
       @remove="handleRemoveMember" 
+      @update="handleUpdateMember" 
     />
 
     <RoomInput 
@@ -103,6 +114,7 @@ const runSolver = () => {
       :grade-mode="gradeMode"
       @add="handleAddConstraint" 
       @remove="handleRemoveConstraint" 
+      @update="handleUpdateRoom" 
     />
 
     <p v-if="errorMessage" style="color: red; font-weight: bold; text-align: center;">
