@@ -149,7 +149,7 @@ const formatGrade = (grade: string | number) => isNaN(Number(grade)) ? String(gr
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
         <input 
           v-model="inputName" 
-          placeholder="名前 (例: SH)" 
+          placeholder="名前" 
           style="padding: 10px; font-size: 16px; border: 1px solid #ccd0d5; border-radius: 6px; flex: 1; min-width: 150px; background-color: white;"
           @keyup.enter="handleAdd"
         />

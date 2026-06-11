@@ -58,7 +58,7 @@ const cancelEdit = () => {
     <div style="display: flex; gap: 10px; justify-content: flex-start; margin-bottom: 25px; flex-wrap: wrap; align-items: center;">
       <input 
         v-model="inputRoomName" 
-        placeholder="部屋名 (例: 101号室)" 
+        placeholder="部屋名" 
         style="padding: 10px; font-size: 16px; border: 1px solid #ccd0d5; border-radius: 6px; flex: 1; min-width: 200px; background-color: white;"
         @keyup.enter="handleAdd"
       />
